@@ -131,7 +131,7 @@ USAGE <- USAGE |>
 print(most_total_vrm)
 ```
 
-# Task 3: B. Transit Mode with Most Total VRM: 
+# Task 3: B. Transit Mode with Most Total VRM:
 
 ```         
 most_mode_vrm <- USAGE |>
@@ -151,7 +151,7 @@ nyc_subway_trips <- USAGE |>
 print(nyc_subway_trips)
 ```
 
-# Task 3: D. Mode with Longest Average Trip in May 2024 
+# Task 3: D. Mode with Longest Average Trip in May 2024
 
 ```         
 average_trip_length <- USAGE |>
