@@ -2,7 +2,7 @@
 title: "MiniProject #01 Analysis"
 author: "Siddhi Kataria"
 output:
-  html_document: https://katariasiddhi.github.io/STA9750-2024-FALL/"
+  html_document: https://katariasiddhi.github.io/STA9750-2024-FALL/mp01.html
   toc: true
   toc_depth: 2 
 ---
