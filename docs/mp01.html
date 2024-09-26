@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Siddhi Kataria">
+<meta name="description" content="This project looks into fiscal performance of US public transit system. We analyze the data from National Transit Databse to answer simple questions about our transit systems">
 
 <title>MiniProject #01 Analysis – STA 9750 2024 Submission Material</title>
 <style>
@@ -101,6 +102,11 @@ ul.task-list li input[type="checkbox"] {
 <h1 class="title">MiniProject #01 Analysis</h1>
 </div>
 
+<div>
+  <div class="description">
+    This project looks into fiscal performance of US public transit system. We analyze the data from National Transit Databse to answer simple questions about our transit systems
+  </div>
+</div>
 
 
 <div class="quarto-title-meta">
@@ -128,7 +134,7 @@ ul.task-list li input[type="checkbox"] {
 <p>if(!require(“quarto”)){ install.packages(“quarto”) } library(quarto) if(!quarto::quarto_binary_sitrep()){ stop(“Something is wrong with your quarto installation.”) } quarto::quarto_render(“.”) system(“git add docs/*”) if(!any(grepl(“rstudio”, search()))){q(“no”)}</p>
 <section id="load-necessary-libraries" class="level1">
 <h1>Load necessary libraries</h1>
-<p>library(tidyverse) library(readxl) # Ensure readxl is loaded for reading Excel files</p>
+<p>library(tidyverse) library(readxl)</p>
 </section>
 <section id="set-the-correct-file-path" class="level1">
 <h1>Set the correct file path</h1>
@@ -155,27 +161,78 @@ ul.task-list li input[type="checkbox"] {
 <p>print(USAGE)</p>
 <p>if(!require(“DT”)) install.packages(“DT”) library(DT)</p>
 <p>sample_n(USAGE, 1000) |&gt; mutate(month=as.character(month)) |&gt; DT::datatable()</p>
-<p>#Task 1 USAGE &lt;- USAGE |&gt; rename(metro_area = <code>UZA Name</code>)</p>
-<p>#Task 2 unique_modes &lt;- USAGE |&gt; distinct(Mode) print(unique_modes)</p>
+</section>
+<section id="task-1" class="level1">
+<h1>Task 1</h1>
+<p>USAGE &lt;- USAGE |&gt; rename(metro_area = <code>UZA Name</code>)</p>
+</section>
+<section id="task-2" class="level1">
+<h1>Task 2</h1>
+<p>unique_modes &lt;- USAGE |&gt; distinct(Mode) print(unique_modes)</p>
 <p>USAGE &lt;- USAGE |&gt; mutate(Mode = case_when( Mode == “HR” ~ “Heavy Rail”, Mode == “LR” ~ “Light Rail”, Mode == “MB” ~ “Motor Bus”, Mode == “DR” ~ “Demand Response”, Mode == “CR” ~ “Commuter Rail”, Mode == “TB” ~ “Trolley Bus”, TRUE ~ “Unknown” ))</p>
-<p>#Task 3: A. Transit Agency with Most Total VRM: most_total_vrm &lt;- USAGE |&gt; group_by(<code>Agency</code>) |&gt; summarize(total_VRM = sum(VRM, na.rm = TRUE)) |&gt; arrange(desc(total_VRM)) |&gt; slice(1) print(most_total_vrm)</p>
-<p>#Task 3: B. Transit Mode with Most Total VRM: most_mode_vrm &lt;- USAGE |&gt; group_by(Mode) |&gt; summarize(total_VRM = sum(VRM, na.rm = TRUE)) |&gt; arrange(desc(total_VRM)) |&gt; slice(1) print(most_mode_vrm)</p>
-<p>#Task 3: C. Trips Taken on the NYC Subway in May 2024: nyc_subway_trips &lt;- USAGE |&gt; filter(Mode == “Heavy Rail”, month == “2024-05-01”) |&gt; summarize(total_trips = sum(UPT, na.rm = TRUE)) print(nyc_subway_trips)</p>
-<p>#Task 3: D. Mode with Longest Average Trip in May 202 average_trip_length &lt;- USAGE |&gt; filter(month == “2024-05-01”) |&gt; group_by(Mode) |&gt; summarize( total_VRM = sum(VRM, na.rm = TRUE), # Total Vehicle Revenue Miles total_trips = sum(UPT, na.rm = TRUE), # Total trips average_trip_length = total_VRM / total_trips # Average trip length estimation ) |&gt; arrange(desc(average_trip_length)) |&gt; slice(1)</p>
+</section>
+<section id="task-3-a." class="level1">
+<h1>Task 3: A.</h1>
+<p>Transit Agency with Most Total VRM: most_total_vrm &lt;- USAGE |&gt; group_by(<code>Agency</code>) |&gt; summarize(total_VRM = sum(VRM, na.rm = TRUE)) |&gt; arrange(desc(total_VRM)) |&gt; slice(1) print(most_total_vrm)</p>
+</section>
+<section id="task-3-b." class="level1">
+<h1>Task 3: B.</h1>
+<p>Transit Mode with Most Total VRM: most_mode_vrm &lt;- USAGE |&gt; group_by(Mode) |&gt; summarize(total_VRM = sum(VRM, na.rm = TRUE)) |&gt; arrange(desc(total_VRM)) |&gt; slice(1) print(most_mode_vrm)</p>
+</section>
+<section id="task-3-c." class="level1">
+<h1>Task 3: C.</h1>
+<p>Trips Taken on the NYC Subway in May 2024: nyc_subway_trips &lt;- USAGE |&gt; filter(Mode == “Heavy Rail”, month == “2024-05-01”) |&gt; summarize(total_trips = sum(UPT, na.rm = TRUE)) print(nyc_subway_trips)</p>
+</section>
+<section id="task-3-d." class="level1">
+<h1>Task 3: D.</h1>
+<p>Mode with Longest Average Trip in May 202 average_trip_length &lt;- USAGE |&gt; filter(month == “2024-05-01”) |&gt; group_by(Mode) |&gt; summarize( total_VRM = sum(VRM, na.rm = TRUE), # Total Vehicle Revenue Miles total_trips = sum(UPT, na.rm = TRUE), # Total trips average_trip_length = total_VRM / total_trips # Average trip length estimation ) |&gt; arrange(desc(average_trip_length)) |&gt; slice(1)</p>
 <p>print(average_trip_length)</p>
-<p>#Task 3: E. NYC Subway Ridership Fall Between April 2019 and April 2020 ridership_fall &lt;- USAGE |&gt; filter(Mode == “Heavy Rail”, month %in% c(“2019-04-01”, “2020-04-01”)) |&gt; group_by(month) |&gt; summarize(total_ridership = sum(UPT, na.rm = TRUE)) |&gt; mutate(difference = total_ridership[month == “2020-04-01”] - total_ridership[month == “2019-04-01”]) print(ridership_fall)</p>
-<p>#Task 4: Interesting fact #1 total_ridership &lt;- USAGE |&gt; group_by(Agency) |&gt; summarize(total_UPT = sum(UPT, na.rm = TRUE)) |&gt; arrange(desc(total_UPT)) |&gt; slice(1) print(total_ridership)</p>
-<p>#Task 4: Interesting fact #2 average_VRM_by_mode &lt;- USAGE |&gt; group_by(Mode) |&gt; summarize(average_VRM = mean(VRM, na.rm = TRUE)) |&gt; arrange(desc(average_VRM)) |&gt; slice(1) print(average_VRM_by_mode)</p>
-<p>#Task 4: Interesting fact #3 active_agencies_count &lt;- USAGE |&gt; filter(month == “2024-05-01”) |&gt; distinct(Agency) |&gt; count() print(active_agencies_count)</p>
-<p>#Task 5: Create Annual Totals for UPT and VRM for 2022 library(lubridate)</p>
+</section>
+<section id="task-3-e." class="level1">
+<h1>Task 3: E.</h1>
+<p>NYC Subway Ridership Fall Between April 2019 and April 2020 ridership_fall &lt;- USAGE |&gt; filter(Mode == “Heavy Rail”, month %in% c(“2019-04-01”, “2020-04-01”)) |&gt; group_by(month) |&gt; summarize(total_ridership = sum(UPT, na.rm = TRUE)) |&gt; mutate(difference = total_ridership[month == “2020-04-01”] - total_ridership[month == “2019-04-01”]) print(ridership_fall)</p>
+</section>
+<section id="task-4-interesting-fact-1" class="level1">
+<h1>Task 4: Interesting fact #1</h1>
+<p>total_ridership &lt;- USAGE |&gt; group_by(Agency) |&gt; summarize(total_UPT = sum(UPT, na.rm = TRUE)) |&gt; arrange(desc(total_UPT)) |&gt; slice(1) print(total_ridership)</p>
+</section>
+<section id="task-4-interesting-fact-2" class="level1">
+<h1>Task 4: Interesting fact #2</h1>
+<p>average_VRM_by_mode &lt;- USAGE |&gt; group_by(Mode) |&gt; summarize(average_VRM = mean(VRM, na.rm = TRUE)) |&gt; arrange(desc(average_VRM)) |&gt; slice(1) print(average_VRM_by_mode)</p>
+</section>
+<section id="task-4-interesting-fact-3" class="level1">
+<h1>Task 4: Interesting fact #3</h1>
+<p>active_agencies_count &lt;- USAGE |&gt; filter(month == “2024-05-01”) |&gt; distinct(Agency) |&gt; count() print(active_agencies_count)</p>
+</section>
+<section id="task-5" class="level1">
+<h1>Task 5:</h1>
+<p>Create Annual Totals for UPT and VRM for 2022 library(lubridate)</p>
 <p>USAGE_2022_ANNUAL &lt;- USAGE |&gt; filter(year(month) == 2022) |&gt; group_by(<code>NTD ID</code>, Agency, metro_area, Mode) |&gt; summarize( UPT = sum(UPT, na.rm = TRUE), VRM = sum(VRM, na.rm = TRUE) ) |&gt; ungroup()</p>
 <p>USAGE_AND_FINANCIALS &lt;- left_join(USAGE_2022_ANNUAL, FINANCIALS, join_by(<code>NTD ID</code>, Mode)) |&gt; drop_na()</p>
-<p>#Task 6 I: Which transit system (agency and mode) had the most UPT in 2022? USAGE_AND_FINANCIALS |&gt; arrange(desc(UPT)) |&gt; slice(1) |&gt; select(Agency, Mode, UPT)</p>
-<p>#Task 6 II: Which transit system (agency and mode) had the highest farebox recovery, defined as the highest ratio of Total Fares to Expenses? USAGE_AND_FINANCIALS |&gt; mutate(farebox_recovery = <code>Total Fares</code> / Expenses) |&gt; arrange(desc(farebox_recovery)) |&gt; slice(1)</p>
-<p>#Task 6 III:Which transit system (agency and mode) has the lowest expenses per UPT? USAGE_AND_FINANCIALS |&gt; mutate(expenses_per_UPT = Expenses / UPT) |&gt; arrange(expenses_per_UPT) |&gt; slice(1)</p>
-<p>#Task 6 IV: Which transit system (agency and mode) has the highest total fares per UPT? USAGE_AND_FINANCIALS |&gt; mutate(fares_per_UPT = <code>Total Fares</code> / UPT) |&gt; arrange(desc(fares_per_UPT)) |&gt; slice(1)</p>
-<p>#Task 6 V: Which transit system (agency and mode) has the lowest expenses per VRM? USAGE_AND_FINANCIALS |&gt; mutate(expenses_per_VRM = Expenses / VRM) |&gt; arrange(expenses_per_VRM) |&gt; slice(1)</p>
-<p>#Task 6 VI: Which transit system (agency and mode) has the highest total fares per VRM? USAGE_AND_FINANCIALS |&gt; mutate(fares_per_VRM = <code>Total Fares</code> / VRM) |&gt; arrange(desc(fares_per_VRM)) |&gt; slice(1)</p>
+</section>
+<section id="task-6-i-which-transit-system-agency-and-mode-had-the-most-upt-in-2022" class="level1">
+<h1>Task 6 I: Which transit system (agency and mode) had the most UPT in 2022?</h1>
+<p>USAGE_AND_FINANCIALS |&gt; arrange(desc(UPT)) |&gt; slice(1) |&gt; select(Agency, Mode, UPT)</p>
+</section>
+<section id="task-6-ii-which-transit-system-agency-and-mode-had-the-highest-farebox-recovery-defined-as-the-highest-ratio-of-total-fares-to-expenses" class="level1">
+<h1>Task 6 II: Which transit system (agency and mode) had the highest farebox recovery, defined as the highest ratio of Total Fares to Expenses?</h1>
+<p>USAGE_AND_FINANCIALS |&gt; mutate(farebox_recovery = <code>Total Fares</code> / Expenses) |&gt; arrange(desc(farebox_recovery)) |&gt; slice(1)</p>
+</section>
+<section id="task-6-iiiwhich-transit-system-agency-and-mode-has-the-lowest-expenses-per-upt" class="level1">
+<h1>Task 6 III:Which transit system (agency and mode) has the lowest expenses per UPT?</h1>
+<p>USAGE_AND_FINANCIALS |&gt; mutate(expenses_per_UPT = Expenses / UPT) |&gt; arrange(expenses_per_UPT) |&gt; slice(1)</p>
+</section>
+<section id="task-6-iv-which-transit-system-agency-and-mode-has-the-highest-total-fares-per-upt" class="level1">
+<h1>Task 6 IV: Which transit system (agency and mode) has the highest total fares per UPT?</h1>
+<p>USAGE_AND_FINANCIALS |&gt; mutate(fares_per_UPT = <code>Total Fares</code> / UPT) |&gt; arrange(desc(fares_per_UPT)) |&gt; slice(1)</p>
+</section>
+<section id="task-6-v-which-transit-system-agency-and-mode-has-the-lowest-expenses-per-vrm" class="level1">
+<h1>Task 6 V: Which transit system (agency and mode) has the lowest expenses per VRM?</h1>
+<p>USAGE_AND_FINANCIALS |&gt; mutate(expenses_per_VRM = Expenses / VRM) |&gt; arrange(expenses_per_VRM) |&gt; slice(1)</p>
+</section>
+<section id="task-6-vi-which-transit-system-agency-and-mode-has-the-highest-total-fares-per-vrm" class="level1">
+<h1>Task 6 VI: Which transit system (agency and mode) has the highest total fares per VRM?</h1>
+<p>USAGE_AND_FINANCIALS |&gt; mutate(fares_per_VRM = <code>Total Fares</code> / VRM) |&gt; arrange(desc(fares_per_VRM)) |&gt; slice(1)</p>
 
 
 </section>
