@@ -7,6 +7,7 @@ output:
     toc: true
 ---
 
+
 ## Introduction
 
 Welcome to the **IMDb Data Analysis** - MiniProject #02! This project explores a large dataset from IMDb, focusing on the characteristics of movies, directors, and other key players in the film industry. As a Hollywood development executive, the goal of this analysis is to uncover trends, evaluate movie ratings, and identify potential factors for success in the industry. Through a combination of data exploration, visualization, and modeling, we aim to derive insights that could help guide future decisions for film projects.
@@ -14,6 +15,7 @@ Welcome to the **IMDb Data Analysis** - MiniProject #02! This project explores a
 Dive into the data to discover the inner workings of Hollywood!
 
 ## Setting up the data
+
 
 ```{r}
 get_imdb_file <- function(fname){
@@ -35,9 +37,11 @@ TITLE_PRINCIPALS <- get_imdb_file("title.principals")
 
 ```
 
+
 ## Data Sub-Sampling
 
 `{r}`
+
 
 ```{r}
 library(ggplot2)
@@ -69,7 +73,6 @@ print(quantiles)
 ```
 
 ```{r}
-library(dplyr)
 TITLE_BASICS <- TITLE_BASICS |>
     semi_join(TITLE_RATINGS, 
               join_by(tconst == tconst))
@@ -97,9 +100,11 @@ rm(TITLE_EPISODES_1)
 rm(TITLE_EPISODES_2)
 ```
 
+
 `{r} glimpse(NAME_BASICS)}`
 
 ## **How many movies are in our data set? How many TV series? How many TV episodes?**
+
 
 ```{r}
 TITLE_BASICS |>
@@ -109,7 +114,9 @@ TITLE_BASICS |>
 
 ```
 
+
 ### **Who is the oldest living person in our dataset?**
+
 
 ```{r}
 NAME_BASICS |>
@@ -121,15 +128,29 @@ NAME_BASICS |>
 
 ```
 
+
 ### **There is one TV Episode in this data set with a perfect 10/10 rating and at least 200,000 IMDb ratings. What is it? What series does it belong to?**
 
-```{r}
 
+```{r}
+# Find the episode with a 10/10 rating and at least 200,000 votes
+perfect_episode <- TITLE_RATINGS |>
+  filter(averageRating == 10, numVotes >= 200000)
+
+# Join to TITLE_EPISODES to find the series it belongs to
+perfect_episode_info <- perfect_episode |>
+  inner_join(TITLE_EPISODES, by = "tconst") |>
+  inner_join(TITLE_BASICS, by = c("parentTconst" = "tconst")) |>
+  select(episodeTitle = primaryTitle.x, seriesTitle = primaryTitle.y)
+
+perfect_episode_info
 
 
 ```
 
+
 ### **What TV series, with more than 12 episodes, has the highest average rating?**
+
 
 ```{r}
 # Join TITLE_RATINGS with TITLE_EPISODES
@@ -157,7 +178,9 @@ highest_rated_series_info <- highest_rated_series |>
 highest_rated_series_info
 ```
 
+
 ### **Is it true that episodes from later seasons of *Happy Days* have lower average ratings than the early seasons?**
+
 
 ```{r}
 # Get tconst for Happy Days
@@ -178,7 +201,9 @@ happy_days_episodes |>
   summarise(avg_rating = mean(averageRating, na.rm = TRUE))
 ```
 
+
 ### **How many movies are in our data set? How many TV series? How many TV episodes?**
+
 
 ```{r}
 # Count the number of movies, TV series, and TV episodes
@@ -191,7 +216,9 @@ tv_series_count
 tv_episode_count
 ```
 
+
 ### **Perfect TV Episode with a 10/10 Rating and 200,000 IMDb Ratings**
+
 
 ```{r}
 perfect_episode <- TITLE_RATINGS %>%
@@ -200,7 +227,9 @@ print(perfect_episode)
 
 ```
 
+
 ### **TV Series with the Highest Average Rating (More than 12 Episodes)**
+
 
 ```{r}
 
@@ -215,7 +244,9 @@ highest_rated_series <- TITLE_RATINGS %>%
   slice(1)
 ```
 
+
 **Episode Ratings of "Happy Days"**
+
 
 ```{r}
 library(dplyr)
@@ -236,7 +267,9 @@ average_ratings_by_season
 
 ```
 
+
 ### **Custom Success Metric**
+
 
 ```{r}
 TITLE_RATINGS <- TITLE_RATINGS %>%
@@ -253,7 +286,9 @@ low_quality_movies <- TITLE_RATINGS %>%
 
 ```
 
+
 ### **Examining Success by Genre and Decade**
+
 
 ```{r}
 # Join TITLE_BASICS and TITLE_RATINGS to have genre and rating 
@@ -262,7 +297,6 @@ low_quality_movies <- TITLE_RATINGS %>%
 
 ```{r}
 library(ggplot2)
-library(dplyr) 
 
 # Sample data
 talent_data <- data.frame(
@@ -279,11 +313,12 @@ ggplot(talent_data, aes(x = Name, y = BoxOffice, fill = Name)) +
 
 ```
 
+
 **Pitch for Key Talent: Glen Powell, Zendaya, and Anthony Russo**
 
 Glen Powell is well-known for his captivating roles in movies like Set It Up and Twisters. He has proven to have a remarkable capacity to engage audiences. He is the perfect choice for a dynamic film production because of his versatility, which enables him to play both romantic leads and action-packed characters. Additionally, Powell's increasing reputation can greatly increase the film's appeal, especially among younger audiences.
 
-Zendaya: With her roles in Spider-Man: No Way Home and Euphoria, Zendaya has enthralled viewers and is currently one of the most well-known and significant young actors. She is a grseat tool for drawing in a varied audience because of her ability to depict nuanced characters and her active social media presence.a film is demonstrated by her critical and box office success.
+Zendaya: With her roles in Spider-Man: No Way Home and Euphoria, Zendaya has enthralled viewers and is currently one of the most well-known and significant young actors. She is a great tool for drawing in a varied audience because of her ability to depict nuanced characters and her active social media presence.a film is demonstrated by her critical and box office success.
 
 Anthony Russo is a well-known director who has led the film business with his efforts on blockbuster movies like Captain America: Civil War and Avengers: Endgame. His skill in telling gripping stories and his ability to collaborate well with actors guarantee that the movie will be both aesthetically spectacular and emotionally impactful. Russo is the ideal filmmaker for this project because of his history of producing financially successful movies.
 
@@ -294,3 +329,4 @@ With a startling 200% growth in box office receipts over the past ten years, the
 We pledge to make a movie that appeals to both action lovers and die-hard fans, starring Glen Powell, a rising star known for his explosive roles in Top Gun: Maverick and Set It Up, and the adored Zendaya, acclaimed for her parts in Spider-Man and Euphoria. Powell and Zendaya's chemistry together will light up the screen and make for an engaging movie.
 
 This movie explores themes of sacrifice and resiliency while telling the classic story of friendship, bravery, and redemption. This project is not just another action movie; it's a remarkable cinematic experience that will have viewers on the edge of their seats with its distinct fusion of heart-pounding action and emotional depth.\
+
