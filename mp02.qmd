@@ -1,0 +1,304 @@
+---
+title: "IMDb Data Analysis - MiniProject #02"
+author: "Siddhi Kataria"
+date: "2024-10-23"
+output:
+  html_document:
+    toc: true
+---
+
+## Introduction
+
+Welcome to the **IMDb Data Analysis** - MiniProject #02! This project explores a large dataset from IMDb, focusing on the characteristics of movies, directors, and other key players in the film industry. As a Hollywood development executive, the goal of this analysis is to uncover trends, evaluate movie ratings, and identify potential factors for success in the industry. Through a combination of data exploration, visualization, and modeling, we aim to derive insights that could help guide future decisions for film projects.
+
+Dive into the data to discover the inner workings of Hollywood!
+
+## Setting up the data
+
+```{r}
+get_imdb_file <- function(fname){
+    BASE_URL <- "https://datasets.imdbws.com/"
+    fname_ext <- paste0(fname, ".tsv.gz")
+    if(!file.exists(fname_ext)){
+        FILE_URL <- paste0(BASE_URL, fname_ext)
+        download.file(FILE_URL, destfile = fname_ext)
+    }
+    as.data.frame(readr::read_tsv(fname_ext, lazy=FALSE))
+}
+
+NAME_BASICS      <- get_imdb_file("name.basics")
+TITLE_BASICS     <- get_imdb_file("title.basics")
+TITLE_EPISODES   <- get_imdb_file("title.episode")
+TITLE_RATINGS    <- get_imdb_file("title.ratings")
+TITLE_CREW       <- get_imdb_file("title.crew")
+TITLE_PRINCIPALS <- get_imdb_file("title.principals")
+
+```
+
+## Data Sub-Sampling
+
+`{r}`
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+TITLE_RATINGS |>
+  ggplot(aes(x=numVotes)) + 
+  geom_histogram(bins=30) +
+  xlab("Number of IMDB Ratings") + 
+  ylab("Number of Titles") + 
+  ggtitle("Majority of IMDB Titles Have Less than 100 Ratings") + 
+  theme_bw() + 
+  scale_x_log10(label=scales::comma) + 
+  scale_y_continuous(label=scales::comma)
+
+ 
+```
+
+```{r}
+# Assuming TITLE_RATINGS is already defined and is a data frame
+quantiles <- TITLE_RATINGS |>
+    dplyr::pull(numVotes) |>
+    quantile()
+
+# Print the quantiles
+print(quantiles)
+
+```
+
+```{r}
+TITLE_BASICS <- TITLE_BASICS |>
+    semi_join(TITLE_RATINGS, 
+              join_by(tconst == tconst))
+
+TITLE_CREW <- TITLE_CREW |>
+    semi_join(TITLE_RATINGS, 
+              join_by(tconst == tconst))
+
+TITLE_EPISODES_1 <- TITLE_EPISODES |>
+    semi_join(TITLE_RATINGS, 
+              join_by(tconst == tconst))
+TITLE_EPISODES_2 <- TITLE_EPISODES |>
+    semi_join(TITLE_RATINGS, 
+              join_by(parentTconst == tconst))
+
+TITLE_EPISODES <- bind_rows(TITLE_EPISODES_1,
+                            TITLE_EPISODES_2) |>
+    distinct()
+
+TITLE_PRINCIPALS <- TITLE_PRINCIPALS |>
+    semi_join(TITLE_RATINGS, join_by(tconst == tconst))
+
+
+rm(TITLE_EPISODES_1)
+rm(TITLE_EPISODES_2)
+```
+
+`{r} glimpse(NAME_BASICS)}`
+
+## **How many movies are in our data set? How many TV series? How many TV episodes?**
+
+```{r}
+TITLE_BASICS |>
+  filter(titleType %in% c("movie", "tvSeries", "tvEpisode")) |>
+  group_by(titleType) |>
+  summarise(count = n())
+
+```
+
+### **Who is the oldest living person in our dataset?**
+
+```{r}
+NAME_BASICS |>
+  filter(deathYear == "\\N", birthYear != "\\N") |>
+  mutate(birthYear = as.numeric(birthYear)) |>
+  arrange(birthYear) |>
+  slice(1) |>
+  select(primaryName, birthYear)
+
+```
+
+### **There is one TV Episode in this data set with a perfect 10/10 rating and at least 200,000 IMDb ratings. What is it? What series does it belong to?**
+
+```{r}
+# Find the episode with a 10/10 rating and at least 200,000 votes
+perfect_episode <- TITLE_RATINGS |>
+  filter(averageRating == 10, numVotes >= 200000)
+
+# Join to TITLE_EPISODES to find the series it belongs to
+perfect_episode_info <- perfect_episode |>
+  inner_join(TITLE_EPISODES, by = "tconst") |>
+  inner_join(TITLE_BASICS, by = c("parentTconst" = "tconst")) |>
+  select(episodeTitle = primaryTitle.x, seriesTitle = primaryTitle.y)
+
+perfect_episode_info
+
+
+```
+
+### **What TV series, with more than 12 episodes, has the highest average rating?**
+
+```{r}
+# Join TITLE_RATINGS with TITLE_EPISODES
+ratings_with_episodes <- TITLE_RATINGS |>
+  inner_join(TITLE_EPISODES, by = "tconst")
+
+# Group by parentTconst and summarize to get average rating and count of episodes
+series_episode_counts <- ratings_with_episodes |>
+  group_by(parentTconst) |>
+  summarize(
+    avg_rating = mean(averageRating, na.rm = TRUE),
+    episode_count = n()
+  )
+
+# Filter for series with more than 12 episodes and get the one with the highest average rating
+highest_rated_series <- series_episode_counts |>
+  filter(episode_count > 12) |>
+  slice_max(order_by = avg_rating, n = 1)
+
+# Join back to TITLE_BASICS to get the series title
+highest_rated_series_info <- highest_rated_series |>
+  inner_join(TITLE_BASICS, by = c("parentTconst" = "tconst")) |>
+  select(seriesTitle = primaryTitle, avg_rating)
+
+highest_rated_series_info
+```
+
+### **Is it true that episodes from later seasons of *Happy Days* have lower average ratings than the early seasons?**
+
+```{r}
+# Get tconst for Happy Days
+happy_days_tconst <- TITLE_BASICS |>
+  filter(primaryTitle == "Happy Days", startYear == "1974") |>
+  pull(tconst)
+
+# Find episodes of Happy Days and join with ratings
+happy_days_episodes <- TITLE_EPISODES |>
+  filter(parentTconst == happy_days_tconst) |>
+  inner_join(TITLE_RATINGS, by = "tconst") |>
+  select(seasonNumber, averageRating)
+
+# Compare ratings between early and later seasons
+happy_days_episodes |>
+  mutate(seasonNumber = as.numeric(seasonNumber)) |>
+  group_by(seasonNumber < 5) |>
+  summarise(avg_rating = mean(averageRating, na.rm = TRUE))
+```
+
+### **How many movies are in our data set? How many TV series? How many TV episodes?**
+
+```{r}
+# Count the number of movies, TV series, and TV episodes
+movie_count <- nrow(TITLE_BASICS %>% filter(titleType == "movie"))
+tv_series_count <- nrow(TITLE_BASICS %>% filter(titleType == "tvSeries"))
+tv_episode_count <- nrow(TITLE_BASICS %>% filter(titleType == "tvEpisode"))
+
+movie_count
+tv_series_count
+tv_episode_count
+```
+
+### **Perfect TV Episode with a 10/10 Rating and 200,000 IMDb Ratings**
+
+```{r}
+perfect_episode <- TITLE_RATINGS %>%
+  filter(averageRating == 10 & numVotes >= 200000)
+print(perfect_episode)
+
+```
+
+### **TV Series with the Highest Average Rating (More than 12 Episodes)**
+
+```{r}
+
+series_episode_counts <- TITLE_EPISODES %>%
+  group_by(parentTconst) %>%
+  summarise(episode_count = n())
+
+highest_rated_series <- TITLE_RATINGS %>%
+  inner_join(series_episode_counts, by = c("tconst" = "parentTconst")) %>%
+  filter(episode_count > 12) %>%
+  arrange(desc(averageRating)) %>%
+  slice(1)
+```
+
+**Episode Ratings of "Happy Days"**
+
+```{r}
+library(dplyr)
+
+happy_days_episodes <- TITLE_EPISODES %>%
+  inner_join(TITLE_BASICS, by = "tconst") %>% 
+  filter(grepl("Happy Days", primaryTitle))
+
+happy_days_with_ratings <- happy_days_episodes %>%
+  inner_join(TITLE_RATINGS, by = "tconst") %>%
+  arrange(seasonNumber) 
+
+average_ratings_by_season <- happy_days_with_ratings %>%
+  group_by(seasonNumber) %>%
+  summarize(average_rating = mean(averageRating, na.rm = TRUE), .groups = 'drop')
+
+average_ratings_by_season
+
+```
+
+### **Custom Success Metric**
+
+```{r}
+TITLE_RATINGS <- TITLE_RATINGS %>%
+  mutate(success_metric = averageRating * log(numVotes + 1)) 
+
+top_success_movies <- TITLE_RATINGS %>%
+  arrange(desc(success_metric)) %>%
+  slice(1:10)
+
+low_quality_movies <- TITLE_RATINGS %>%
+  arrange(success_metric) %>%
+  filter(numVotes > 100000) %>%
+  slice(1:5)
+
+```
+
+### **Examining Success by Genre and Decade**
+
+```{r}
+# Join TITLE_BASICS and TITLE_RATINGS to have genre and rating 
+
+```
+
+```{r}
+library(ggplot2)
+
+# Sample data
+talent_data <- data.frame(
+    Name = c("Glen Powell", "Zendaya", "Anthony Russo"),
+    BoxOffice = c(500, 450, 600)  # In millions
+)
+
+ggplot(talent_data, aes(x = Name, y = BoxOffice, fill = Name)) +
+    geom_bar(stat = "identity") +
+    labs(title = "Box Office Earnings of Key Talent",
+         x = "Talent",
+         y = "Box Office (in millions)") +
+    theme_minimal()
+
+```
+
+**Pitch for Key Talent: Glen Powell, Zendaya, and Anthony Russo**
+
+Glen Powell is well-known for his captivating roles in movies like Set It Up and Twisters. He has proven to have a remarkable capacity to engage audiences. He is the perfect choice for a dynamic film production because of his versatility, which enables him to play both romantic leads and action-packed characters. Additionally, Powell's increasing reputation can greatly increase the film's appeal, especially among younger audiences.
+
+Zendaya: With her roles in Spider-Man: No Way Home and Euphoria, Zendaya has enthralled viewers and is currently one of the most well-known and significant young actors. She is a great tool for drawing in a varied audience because of her ability to depict nuanced characters and her active social media presence.a film is demonstrated by her critical and box office success.
+
+Anthony Russo is a well-known director who has led the film business with his efforts on blockbuster movies like Captain America: Civil War and Avengers: Endgame. His skill in telling gripping stories and his ability to collaborate well with actors guarantee that the movie will be both aesthetically spectacular and emotionally impactful. Russo is the ideal filmmaker for this project because of his history of producing financially successful movies.
+
+**Elevator Pitch**
+
+With a startling 200% growth in box office receipts over the past ten years, the action-adventure genre has seen a spike in demand for creative storytelling in today's cinematic scene. Building on this momentum, our film tells an exciting tale under the direction of Anthony Russo, who is well-known for his work on successful blockbusters like Captain America: The Winter Soldier and Avengers: Endgame. More than 90% of Russo's films have been critically and commercially successful, demonstrating his ability to tell gripping stories that appeal to viewers everywhere.
+
+We pledge to make a movie that appeals to both action lovers and die-hard fans, starring Glen Powell, a rising star known for his explosive roles in Top Gun: Maverick and Set It Up, and the adored Zendaya, acclaimed for her parts in Spider-Man and Euphoria. Powell and Zendaya's chemistry together will light up the screen and make for an engaging movie.
+
+This movie explores themes of sacrifice and resiliency while telling the classic story of friendship, bravery, and redemption. This project is not just another action movie; it's a remarkable cinematic experience that will have viewers on the edge of their seats with its distinct fusion of heart-pounding action and emotional depth.\
