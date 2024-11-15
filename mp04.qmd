@@ -291,3 +291,173 @@ ggplot(map_data_merged, aes(x = long, y = lat, group = group, fill = party_simpl
 ```
 
 #### Task 6: Advanced Chloropleth Visualization of Electoral College Results
+
+```{r}
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# Read the data (modify the paths as needed)
+president_data <- read.csv("/Users/siddhikataria/Downloads/1976-2020-president.csv", header = TRUE)
+
+# Filter the data for presidential elections (you can adjust the years here)
+president_data_filtered <- president_data %>%
+  filter(year %in% c(1976, 1980, 1984, 1988, 1992, 1996, 2000, 2004, 2008, 2012, 2016, 2020)) %>%
+  select(year, state, party_simplified, candidatevotes, totalvotes)
+
+# Calculate the winner for each state by checking the maximum candidate votes
+president_data_filtered <- president_data_filtered %>%
+  group_by(year, state) %>%
+  mutate(winner = if_else(candidatevotes == max(candidatevotes), party_simplified, NA_character_)) %>%
+  ungroup()
+
+# Convert the state names in 'state' column to lowercase to match map_data regions
+president_data_filtered <- president_data_filtered %>%
+  mutate(state = tolower(state))
+
+# Now load the state map data (use 'map_data()' to get the state shapes)
+map_data_merged <- map_data("state") %>%
+  left_join(president_data_filtered, by = c("region" = "state"))
+
+# Check for any missing data after the join (this could indicate problems with the merge)
+summary(map_data_merged)
+
+# Create the faceted map
+ggplot(map_data_merged, aes(x = long, y = lat, group = group, fill = winner)) +
+  geom_polygon(color = "white") +
+  scale_fill_manual(values = c("red", "blue", "gray70")) +  # Red for Republican, Blue for Democrat, Gray for NA
+  labs(title = "U.S. Presidential Election Results Over Time",
+       fill = "Party") +
+  theme_minimal() +
+  theme(legend.position = "bottom", 
+        strip.text = element_text(size = 12)) +  # Adjust facet label size
+  facet_wrap(~year) +  # Facet by year
+  coord_fixed()  # Ensure map aspect ratio is correct
+
+```
+
+```{r}
+
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(maps)
+library(gganimate)
+
+# Read the data
+president_data <- read.csv("/Users/siddhikataria/Downloads/1976-2020-president.csv", header = TRUE)
+
+# Filter the data for presidential elections 
+president_data_filtered <- president_data %>%
+  filter(year %in% c(1976, 1980, 1984, 1988, 1992, 1996, 2000, 2004, 2008, 2012, 2016, 2020)) %>%
+  select(year, state, party_simplified, candidatevotes, totalvotes)
+
+# Calculate the winner for each state by checking the maximum candidate votes
+president_data_filtered <- president_data_filtered %>%
+  group_by(year, state) %>%
+  mutate(winner = if_else(candidatevotes == max(candidatevotes), party_simplified, NA_character_)) %>%
+  ungroup()
+
+# Convert the state names in 'state' column to lowercase to match map_data regions
+president_data_filtered <- president_data_filtered %>%
+  mutate(state = tolower(state))
+
+# Now load the state map data 
+map_data_merged <- map_data("state") %>%
+  left_join(president_data_filtered, by = c("region" = "state"))
+
+# Check for any missing data after the join
+summary(map_data_merged)
+
+# Create the animated map
+animated_plot <- ggplot(map_data_merged, aes(x = long, y = lat, group = group, fill = winner)) +
+  geom_polygon(color = "white") +
+  scale_fill_manual(values = c("red", "blue", "gray70")) +  # Red for Republican, Blue for Democrat, Gray for NA
+  labs(title = "U.S. Presidential Election Results Over Time", 
+       fill = "Party") +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  coord_fixed() +
+  transition_time(year) +  # Animate over 'year'
+  ease_aes('linear')  # Smooth transitions between years
+
+# Render the animation (ensure you have the necessary renderer for gganimate)
+animate(animated_plot, nframes = 100, duration = 10, width = 800, height = 600, renderer = gifski_renderer())
+```
+
+\
+To evaluate the fairness of different **Electoral College Vote (ECV) allocation schemes**, we must first define a fair system and then compare how various schemes impact the election results, especially in close elections. The most common ECV allocation schemes include:
+
+1.  **Winner-Takes-All (WTA)**: The candidate with the most votes in a state gets all the Electoral Votes (EVs) of that state.
+
+2.  **Proportional Representation**: EVs are distributed proportionally based on the percentage of votes each candidate receives in the state.
+
+3.  **District Method**: EVs are split by congressional district vote, with the remaining two EVs allocated to the statewide winner.
+
+4.  **National Popular Vote (NPV)**: The winner of the nationwide popular vote receives all EVs (though this would require a national agreement, as the system is not in place currently).
+
+### Step 1: Defining the "Fairest" Allocation Scheme
+
+A fair scheme should meet the following criteria:
+
+-   **Representation of Popular Vote**: The scheme should reflect the preferences of the majority of voters in a manner that avoids distortion.
+
+-   **Minimizing Disproportionate Influence**: Smaller states should not have disproportionate influence over the outcome.
+
+-   **Preventing Gerrymandering**: The scheme should not be susceptible to manipulation, such as gerrymandering or strategically placing districts.
+
+Given these criteria, the **Proportional Representation** system may be considered the fairest because it more accurately represents the voters' will by allocating EVs proportionally. It ensures that states with differing political preferences are represented fairly, and it avoids the “winner-takes-all” phenomenon, which can result in a candidate winning most of a state's EVs despite losing the vote by a small margin.
+
+### Step 2: Comparing Results Under Different Schemes
+
+To conduct the fact check, we can look at one of the recent U.S. Presidential Elections where the ECV allocation schemes had a significant impact. The **2000 U.S. Presidential Election** is a good example, as it had one of the most controversial outcomes.
+
+-   **2000 Election Overview**:
+
+    -   The election between **George W. Bush** and **Al Gore** ended with Bush winning the Electoral College by 271 to 266 votes, even though Gore won the **popular vote** by around 500,000 votes.
+
+    -   The controversy stemmed from **Florida**, where Bush narrowly won the state by just 537 votes, giving him 25 EVs. If Gore had won Florida, he would have won the presidency despite losing the popular vote.
+
+### Step 3: Evaluating Impact Under Different Schemes
+
+Let’s examine the **2000 election** results under the following allocation schemes:
+
+1.  **Winner-Takes-All (WTA)**:
+
+    -   Under this scheme, **Florida’s 25 EVs** went entirely to **Bush**, despite the very close popular vote margin. This contributed to Bush’s victory.
+
+2.  **Proportional Representation**:
+
+    -   If Florida had used **proportional allocation**, the 25 EVs might have been split based on the popular vote percentages. In 2000, Bush received about 48.8% of the vote, and Gore received 47.9%. Under proportional representation, this could result in a near split of EVs (e.g., 13 for Bush and 12 for Gore), or something very close, depending on rounding.
+
+    -   This would have meant **Gore** could have won more than 270 EVs and secured the presidency, even though Bush won the state’s popular vote by a small margin.
+
+3.  **District Method**:
+
+    -   If Florida had used the **district method**, the EVs would have been allocated based on congressional district results. Florida has 25 EVs, and most of them would have been allocated to the candidate who won the district. The remaining two EVs would go to the statewide winner. Since the districts in Florida in 2000 were generally divided between Democrats and Republicans, Bush likely would have received a majority of the congressional districts, but Gore could have gained a few as well.
+
+    -   This would likely have resulted in a split, with Bush still winning the majority of the EVs, but potentially less so than under the WTA system.
+
+4.  **National Popular Vote**:
+
+    -   Under the **National Popular Vote** system, the winner of the national popular vote would have won the election. In 2000, **Gore** won the popular vote by over 500,000 votes, meaning he would have won the presidency under the NPV system, regardless of the Florida outcome.
+
+### Step 4: Conclusion and Analysis
+
+-   **Impact of ECV Scheme on the 2000 Election**:
+
+    -   The **Winner-Takes-All** scheme played a significant role in Bush’s victory despite Gore winning the popular vote. If Florida had used **proportional allocation**, it’s likely Gore would have received more than half of the EVs from Florida, thus securing a narrow victory in the Electoral College.
+
+    -   If the **National Popular Vote** system had been in place, Gore would have won the election outright, given his popular vote lead.
+
+-   **Fairness Evaluation**:
+
+    -   **Proportional Representation** seems like a fairer system, as it would have more accurately represented the voting preferences in each state, especially in close elections like 2000.
+
+    -   The **Winner-Takes-All** system often distorts the results, giving too much weight to narrow victories in key states, which undermines the principle of one person, one vote.
+
+    -   **National Popular Vote** is also fair because it directly reflects the choice of the majority of voters, reducing the chance for a mismatch between the popular vote and the Electoral College outcome.
+
+**Conclusion**:\
+The **Proportional Representation** scheme is likely the fairest of the allocation methods, especially in close elections like 2000. The **National Popular Vote** is also a fair system, though it would require substantial changes to the U.S. electoral system to implement. The **Winner-Takes-All** system, while effective in providing a clear and quick result, can be seen as unfair, particularly in closely contested elections.
