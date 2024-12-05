@@ -14,9 +14,9 @@ The objective of this project is to analyze and compare two retirement plans off
 
 The analysis is implemented in R using RStudio, taking advantage of packages such as tidyverse, boot, and quantmod for data manipulation, statistical computation, and financial data acquisition. This comprehensive approach ensures robust and replicable results.
 
-## Data Retrieval 
+## Data Retrieval
 
-### Load API keys 
+### Load API keys
 
 ```{r}
 #Accessing the keys
@@ -37,6 +37,14 @@ params <- list(
 )
 response <- GET(alpha_url, query = params)
 alpha_data <- content(response, as = "parsed", simplifyVector = TRUE)
+
+```
+
+```{r}
+# Load necessary libraries
+library(httr)
+
+
 
 ```
 
@@ -103,11 +111,7 @@ gdp_data <- fred_data[["observations"]] %>%
 
 ```
 
-## Visualizations 
-
-```{r}
-
-```
+## Visualizations
 
 ```{r}
 ggplot(sp500_data_clean, aes(x = Date, y = `4. close`)) +
