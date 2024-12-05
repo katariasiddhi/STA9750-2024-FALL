@@ -3,7 +3,7 @@ title: "Monte Carlo-Informed Selection of CUNY Retirement Plans"
 author: "Siddhi Kataria"
 date: "2024-12-04"
 output:
-  html:
+  html_document:
     toc: true
     theme: cosmo
 ---
