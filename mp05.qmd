@@ -291,6 +291,10 @@ wage_df_monthly <- wage_df %>%
 ```
 
 ```{r}
+exists(wage_data"")
+```
+
+```{r}
 library(ggplot2)
 
 # Plot the wage growth data
