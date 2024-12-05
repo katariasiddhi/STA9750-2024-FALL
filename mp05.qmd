@@ -3,7 +3,7 @@ title: "Monte Carlo-Informed Selection of CUNY Retirement Plans"
 author: "Siddhi Kataria"
 date: "2024-12-04"
 output:
-  html_document:
+  html:
     toc: true
     theme: cosmo
 ---
@@ -132,7 +132,36 @@ fred_data <- content(fred_response, as = "parsed", simplifyVector = TRUE)
 ```
 
 ```{r}
-head(fred_data[["observations"]])
+# Load required libraries
+library(tidyverse)
+library(zoo)
+
+# Limit to most recent 1 year (365 days) to reduce data points
+sp500_data_clean <- sp500_data_clean %>%
+  filter(Date >= as.Date(max(Date)) - 365)
+
+# Precompute and downsample moving averages to reduce computation
+sp500_data_clean <- sp500_data_clean %>%
+  mutate(
+    ma_30 = zoo::rollapply(`4. close`, width = 30, FUN = mean, fill = NA, align = "right"),
+    ma_90 = zoo::rollapply(`4. close`, width = 90, FUN = mean, fill = NA, align = "right")
+  ) %>%
+  # Downsample data (keep every 5th row for faster plotting)
+  slice(seq(1, n(), by = 5))
+
+# Plot Closing Prices with Moving Averages
+ggplot(sp500_data_clean, aes(x = Date)) +
+  geom_line(aes(y = `4. close`, color = "Closing Price"), size = 0.5) +
+  geom_line(aes(y = ma_30, color = "30-Day Moving Avg"), size = 0.5) +
+  geom_line(aes(y = ma_90, color = "90-Day Moving Avg"), size = 0.5) +
+  labs(
+    title = "S&P 500 Closing Prices with Moving Averages",
+    x = "Date",
+    y = "Price ($)",
+    color = "Legend"
+  ) +
+  theme_minimal()
+
 
 ```
 
@@ -163,27 +192,7 @@ ggplot(sp500_data_clean, aes(x = Date, y = `4. close`)) +
 
 ```
 
-```{r}
-sp500_data_clean <- sp500_data_clean %>%
-  arrange(Date) %>%
-  mutate(
-    ma_30 = zoo::rollmean(`4. close`, k = 30, fill = NA), # 30-day moving average
-    ma_90 = zoo::rollmean(`4. close`, k = 90, fill = NA)  # 90-day moving average
-  )
-
-# Plot Closing Prices with Moving Averages
-ggplot(sp500_data_clean, aes(x = Date)) +
-  geom_line(aes(y = `4. close`, color = "Closing Price")) +
-  geom_line(aes(y = ma_30, color = "30-Day Moving Avg")) +
-  geom_line(aes(y = ma_90, color = "90-Day Moving Avg")) +
-  labs(
-    title = "S&P 500 Closing Prices with Moving Averages",
-    x = "Date",
-    y = "Price ($)",
-    color = "Legend"
-  ) +
-  theme_minimal()
-
+```{}
 ```
 
 ```{r}
