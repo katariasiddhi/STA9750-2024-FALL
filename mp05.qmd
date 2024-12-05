@@ -35,8 +35,8 @@ params <- list(
   symbol = "AAPL",
   apikey = alpha_key
 )
-response <- GET(alpha_url, query = params)
-alpha_data <- content(response, as = "parsed", simplifyVector = TRUE)
+response <- httr::GET(alpha_url, query = params)
+alpha_data <- httr::content(response, as = "parsed", simplifyVector = TRUE)
 
 ```
 
@@ -51,11 +51,48 @@ library(httr)
 ### Parse AlphaVantage Data
 
 ```{r}
+library(tibble)
+library(tidyr)
+library(dplyr) 
 # Parse AlphaVantage Data
 stock_data <- alpha_data[["Time Series (Daily)"]] %>%
   tibble::enframe(name = "Date", value = "Metrics") %>%
   tidyr::unnest_wider(Metrics) %>%
   mutate(Date = as.Date(Date))
+```
+
+```{r}
+
+# Parse AlphaVantage Data
+stock_data <- alpha_data[["Time Series (Daily)"]] %>%
+  tibble::enframe(name = "Date", value = "Metrics") %>%
+  tidyr::unnest_wider(Metrics) %>%
+  mutate(Date = as.Date(Date))
+```
+
+```{r}
+# Example API request to fetch data
+response <- GET("https://www.alphavantage.co/query", query = list(
+  'function' = "TIME_SERIES_DAILY",
+  symbol = "SP500",
+  apikey = "your_api_key"
+))
+
+# Parse the content of the response
+sp500_data <- content(response, "parsed")
+```
+
+```{r}
+params_sp500 <- list(
+  `function` = "TIME_SERIES_DAILY",  # Use the free endpoint
+  symbol = "SPY",                   # Ticker symbol for SPDR S&P 500 ETF
+  apikey = alpha_key
+)
+response_sp500 <- GET(alpha_url, query = params_sp500)
+sp500_data <- content(response_sp500, as = "parsed", simplifyVector = TRUE)
+
+# Inspect response structure
+str(sp500_data)
 ```
 
 ```{r}
