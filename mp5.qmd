@@ -1,0 +1,250 @@
+---
+title: "Monte Carlo-Informed Selection of CUNY Retirement Plans"
+author: "Siddhi Kataria"
+date: "2024-12-04"
+output:
+  html_document:
+    toc: true
+    theme: cosmo
+---
+
+# Introduction
+
+The objective of this project is to analyze and compare two retirement plans offered by CUNY using Monte Carlo simulations. By leveraging historical financial data, bootstrap resampling, and Monte Carlo techniques, we aim to assess the likelihood that one plan outperforms the other under various market conditions. This analysis will consider factors like historical market returns, inflation rates, and individual demographics to provide a data-driven recommendation for optimal retirement planning.
+
+The analysis is implemented in R using RStudio, taking advantage of packages such as tidyverse, boot, and quantmod for data manipulation, statistical computation, and financial data acquisition. This comprehensive approach ensures robust and replicable results.
+
+## Data Retrieval
+
+### Load API keys
+
+```{r}
+#Accessing the keys
+alpha_key <- Sys.getenv("ALPHAVANTAGE_KEY")
+fred_key <- Sys.getenv("FRED_KEY")
+
+
+```
+
+### AlphaVantage Example: Get stock data
+
+```{r}
+alpha_url <- "https://www.alphavantage.co/query"
+params <- list(
+  `function` = "TIME_SERIES_DAILY_ADJUSTED",
+  symbol = "AAPL",
+  apikey = alpha_key
+)
+response <- httr::GET(alpha_url, query = params)
+alpha_data <- httr::content(response, as = "parsed", simplifyVector = TRUE)
+
+```
+
+```{r}
+library(httr)
+
+```
+
+### Parse AlphaVantage Data
+
+```{r}
+library(dplyr)
+
+# Parse AlphaVantage Data
+stock_data <- alpha_data[["Time Series (Daily)"]] %>%
+  tibble::enframe(name = "Date", value = "Metrics") %>%
+  tidyr::unnest_wider(Metrics) %>%
+  mutate(Date = as.Date(Date))
+```
+
+```{r}
+library(httr)
+
+# Example API request to fetch data
+response <- GET("https://www.alphavantage.co/query", query = list(
+  'function' = "TIME_SERIES_DAILY",
+  symbol = "SP500",
+  apikey = "your_api_key"
+))
+
+# Parse the content of the response
+sp500_data <- content(response, "parsed")
+
+```
+
+```{r}
+params_sp500 <- list(
+  `function` = "TIME_SERIES_DAILY",  # Use the free endpoint
+  symbol = "SPY",                   # Ticker symbol for SPDR S&P 500 ETF
+  apikey = alpha_key
+)
+response_sp500 <- GET(alpha_url, query = params_sp500)
+sp500_data <- content(response_sp500, as = "parsed", simplifyVector = TRUE)
+
+# Inspect response structure
+str(sp500_data)
+
+```
+
+```{r}
+library(httr)
+library(tidyverse)
+
+# Extract and parse the "Time Series (Daily)" data
+sp500_data_clean <- sp500_data[["Time Series (Daily)"]] %>%
+  tibble::enframe(name = "Date", value = "Metrics") %>% # Convert list to tibble
+  unnest_wider(Metrics) %>% # Flatten the nested list in "Metrics"
+  mutate(
+    Date = as.Date(Date), # Convert date to Date format
+    `1. open` = as.numeric(`1. open`),
+    `2. high` = as.numeric(`2. high`),
+    `3. low` = as.numeric(`3. low`),
+    `4. close` = as.numeric(`4. close`),
+    `5. volume` = as.numeric(`5. volume`)
+  )
+
+# Inspect the cleaned data
+head(sp500_data_clean)
+
+```
+
+### FRED Example: Get economic indicator data
+
+```{r}
+fred_url <- paste0("https://api.stlouisfed.org/fred/series/observations")
+fred_params <- list(
+  series_id = "GDP",
+  api_key = fred_key,
+  file_type = "json"
+)
+fred_response <- GET(fred_url, query = fred_params)
+fred_data <- content(fred_response, as = "parsed", simplifyVector = TRUE)
+```
+
+```{r}
+head(fred_data[["observations"]])
+
+```
+
+```{r}
+library(ggplot2)
+
+# Parse FRED Data
+gdp_data <- fred_data[["observations"]] %>%
+  tibble::as_tibble() %>%
+  mutate(
+    date = as.Date(date),             
+    value = value         
+  )
+
+
+```
+
+## Visualizations
+
+```{r}
+ggplot(sp500_data_clean, aes(x = Date, y = `4. close`)) +
+  geom_line(color = "blue") +
+  labs(
+    title = "S&P 500 Closing Prices",
+    x = "Date",
+    y = "Closing Price ($)"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+sp500_data_clean <- sp500_data_clean %>%
+  arrange(Date) %>%
+  mutate(
+    ma_30 = zoo::rollmean(`4. close`, k = 30, fill = NA), # 30-day moving average
+    ma_90 = zoo::rollmean(`4. close`, k = 90, fill = NA)  # 90-day moving average
+  )
+
+# Plot Closing Prices with Moving Averages
+ggplot(sp500_data_clean, aes(x = Date)) +
+  geom_line(aes(y = `4. close`, color = "Closing Price")) +
+  geom_line(aes(y = ma_30, color = "30-Day Moving Avg")) +
+  geom_line(aes(y = ma_90, color = "90-Day Moving Avg")) +
+  labs(
+    title = "S&P 500 Closing Prices with Moving Averages",
+    x = "Date",
+    y = "Price ($)",
+    color = "Legend"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+str(fred_data)
+
+```
+
+```{r}
+library(tidyverse)
+
+# Extract and clean the observations
+gdp_data_clean <- fred_data$observations %>%
+  mutate(
+    date = as.Date(date),           # Convert date to Date format
+    value = as.numeric(value)       # Convert value to numeric, invalid entries become NA
+  ) %>%
+  filter(!is.na(value))             # Remove rows with NA in the value column
+
+# Inspect the cleaned data
+head(gdp_data_clean)
+
+```
+
+```{r}
+ggplot(gdp_data_clean, aes(x = date, y = value)) +
+  geom_line(color = "green") +
+  labs(
+    title = "GDP Over Time",
+    x = "Date",
+    y = "GDP (Billions of Dollars)"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+ggplot(gdp_data_clean, aes(x = date, y = value)) +
+  geom_line(color = "green") +
+  geom_smooth(method = "loess", color = "blue", se = FALSE) +
+  labs(
+    title = "GDP Trend Over Time",
+    x = "Date",
+    y = "GDP (Billions of Dollars)"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+gdp_yoy <- gdp_data_clean %>%
+  mutate(year = lubridate::year(date)) %>% # Extract year from date
+  group_by(year) %>%
+  summarize(avg_gdp = mean(value, na.rm = TRUE)) %>%
+  mutate(
+    yoy_growth = (avg_gdp - lag(avg_gdp)) / lag(avg_gdp) * 100 # YoY growth
+  )
+
+# Inspect the YoY Growth Data
+head(gdp_yoy)
+
+```
+
+```{r}
+ggplot(gdp_yoy, aes(x = year, y = yoy_growth)) +
+  geom_col(fill = "purple") +
+  labs(
+    title = "Year-over-Year GDP Growth",
+    x = "Year",
+    y = "YoY Growth (%)"
+  ) +
+  theme_minimal()
+
+```
