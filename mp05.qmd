@@ -3,9 +3,12 @@ title: "Monte Carlo-Informed Selection of CUNY Retirement Plans"
 author: "Siddhi Kataria"
 date: "2024-12-04"
 output:
-  html_document:
+  html:
     toc: true
-    theme: cosmo
+    toc_depth: 2
+    theme: lux  # Change to cosmo or flatly if preferred
+    css: styles.css  # Optional: Add your custom CSS
+    number-sections: true
 ---
 
 # Introduction
