@@ -267,6 +267,14 @@ ggplot(gdp_yoy, aes(x = year, y = yoy_growth)) +
 ```
 
 ```{r}
+wage_data <- data.frame(
+  date = c("2001-01-01", "2001-04-01", "2001-07-01", "2001-10-01", "2002-01-01", "2002-04-01"),
+  value = c("87.6", "88.4", "89.2", "90.0", "90.7", "91.6")
+)
+
+```
+
+```{r}
 # Process wage growth data
 library(dplyr)
 library(tidyr)
@@ -288,10 +296,6 @@ wage_df_monthly <- wage_df %>%
   fill(value, .direction = "down")  # Fill missing values by carrying forward
 
 
-```
-
-```{r}
-exists(wage_data"")
 ```
 
 ```{r}
@@ -443,7 +447,7 @@ ggplot(simulated_cum_df, aes(x = month, y = cumulative_return, group = simulatio
 
 ```
 
-###  Summary Statistics for the Simulations
+### Summary Statistics for the Simulations
 
 ```{r}
 # Calculate summary statistics at the final month
@@ -725,7 +729,7 @@ bootstrap_results <- lapply(seq_len(n_bootstrap), function(i) {
 
 ```
 
-### Analysis 
+### Analysis
 
 ```{r}
 # Analyze bootstrap results
