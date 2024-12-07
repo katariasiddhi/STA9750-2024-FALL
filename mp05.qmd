@@ -7,16 +7,16 @@ project:
 
 format:
   html:
-    theme: lux          # Use your preferred theme
-    css: styles.css     # Optional: Add your custom CSS for styles
-    toc: true           # Include a table of contents
-    toc-depth: 2        # Depth for table of contents
+    theme: flatly       
+    css: styles.css     
+    toc: true           
+    toc-depth: 2        
     number-sections: true
 
 publish:
   gh_pages:
-    branch: gh-pages    # Publish to the `gh-pages` branch
-    path: /             # Root directory of the GitHub Pages site
+    branch: gh-pages   
+    path: /             
 ---
 
 # Introduction
