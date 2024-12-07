@@ -1,21 +1,11 @@
 ---
 title: "Monte Carlo-Informed Selection of CUNY Retirement Plans"
 author: "Siddhi Kataria"
-date: "2024-12-04"
-
-format:
-  html:
-    theme: flatly       # Theme for styling
-    css: styles.css     # Optional custom CSS file
-    toc: true           # Include a table of contents
-    toc-depth: 2        # Depth of the table of contents
-    number-sections: true # Number sections in the document
-
-execute:
-  echo: true            # Show code in the output
-  warning: false        # Suppress warnings in the output
-
-output-file: mp05.html  # Specify output HTML filename
+date: "2024-11-13"
+output:
+  html_document:
+    toc: true
+    theme: cosmo
 ---
 
 # Introduction
