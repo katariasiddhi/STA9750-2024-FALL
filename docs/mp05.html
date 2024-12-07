@@ -6,10 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Siddhi Kataria">
-<meta name="dcterms.date" content="2024-12-04">
 
-<title>Monte Carlo-Informed Selection of CUNY Retirement Plans – STA 9750 2024 Submission Material</title>
+<title>mp05 – STA 9750 2024 Submission Material</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -104,9 +102,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
 
+<link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -126,57 +125,42 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
-<!-- main -->
-<main class="content" id="quarto-document-content">
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Monte Carlo-Informed Selection of CUNY Retirement Plans</h1>
-</div>
-
-
-
-<div class="quarto-title-meta">
-
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Siddhi Kataria </p>
-          </div>
-  </div>
-    
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">December 4, 2024</p>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a>
+  <ul class="collapse">
+  <li><a href="#data-retrieval" id="toc-data-retrieval" class="nav-link" data-scroll-target="#data-retrieval"><span class="header-section-number">1.1</span> Data Retrieval</a></li>
+  <li><a href="#visualizations" id="toc-visualizations" class="nav-link" data-scroll-target="#visualizations"><span class="header-section-number">1.2</span> Visualizations</a></li>
+  <li><a href="#monte-carlo-stimulation" id="toc-monte-carlo-stimulation" class="nav-link" data-scroll-target="#monte-carlo-stimulation"><span class="header-section-number">1.3</span> Monte Carlo Stimulation</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
-  </div>
-  
-    
-  </div>
-  
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
-</header>
 
 
-<section id="introduction" class="level1">
-<h1>Introduction</h1>
+<section id="introduction" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
 <p>The objective of this project is to analyze and compare two retirement plans offered by CUNY using Monte Carlo simulations. By leveraging historical financial data, bootstrap resampling, and Monte Carlo techniques, we aim to assess the likelihood that one plan outperforms the other under various market conditions. This analysis will consider factors like historical market returns, inflation rates, and individual demographics to provide a data-driven recommendation for optimal retirement planning.</p>
 <p>The analysis is implemented in R using RStudio, taking advantage of packages such as tidyverse, boot, and quantmod for data manipulation, statistical computation, and financial data acquisition. This comprehensive approach ensures robust and replicable results.</p>
-<section id="data-retrieval" class="level2">
-<h2 class="anchored" data-anchor-id="data-retrieval">Data Retrieval</h2>
-<section id="load-api-keys" class="level3">
-<h3 class="anchored" data-anchor-id="load-api-keys">Load API keys</h3>
+<section id="data-retrieval" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="data-retrieval"><span class="header-section-number">1.1</span> Data Retrieval</h2>
+<section id="load-api-keys" class="level3" data-number="1.1.1">
+<h3 data-number="1.1.1" class="anchored" data-anchor-id="load-api-keys"><span class="header-section-number">1.1.1</span> Load API keys</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Accessing the keys</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>alpha_key <span class="ot">&lt;-</span> <span class="fu">Sys.getenv</span>(<span class="st">"ALPHAVANTAGE_KEY"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>fred_key <span class="ot">&lt;-</span> <span class="fu">Sys.getenv</span>(<span class="st">"FRED_KEY"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="alphavantage-example-get-stock-data" class="level3">
-<h3 class="anchored" data-anchor-id="alphavantage-example-get-stock-data">AlphaVantage Example: Get stock data</h3>
+<section id="alphavantage-example-get-stock-data" class="level3" data-number="1.1.2">
+<h3 data-number="1.1.2" class="anchored" data-anchor-id="alphavantage-example-get-stock-data"><span class="header-section-number">1.1.2</span> AlphaVantage Example: Get stock data</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>alpha_url <span class="ot">&lt;-</span> <span class="st">"https://www.alphavantage.co/query"</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
@@ -192,8 +176,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(httr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="parse-alphavantage-data" class="level3">
-<h3 class="anchored" data-anchor-id="parse-alphavantage-data">Parse AlphaVantage Data</h3>
+<section id="parse-alphavantage-data" class="level3" data-number="1.1.3">
+<h3 data-number="1.1.3" class="anchored" data-anchor-id="parse-alphavantage-data"><span class="header-section-number">1.1.3</span> Parse AlphaVantage Data</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -900,8 +884,8 @@ Attaching package: 'dplyr'</code></pre>
 </div>
 </div>
 </section>
-<section id="fred-example-get-economic-indicator-data" class="level3">
-<h3 class="anchored" data-anchor-id="fred-example-get-economic-indicator-data">FRED Example: Get economic indicator data</h3>
+<section id="fred-example-get-economic-indicator-data" class="level3" data-number="1.1.4">
+<h3 data-number="1.1.4" class="anchored" data-anchor-id="fred-example-get-economic-indicator-data"><span class="header-section-number">1.1.4</span> FRED Example: Get economic indicator data</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>fred_url <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"https://api.stlouisfed.org/fred/series/observations"</span>)</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>fred_params <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
@@ -981,8 +965,8 @@ Attaching package: 'zoo'</code></pre>
 </div>
 </section>
 </section>
-<section id="visualizations" class="level2">
-<h2 class="anchored" data-anchor-id="visualizations">Visualizations</h2>
+<section id="visualizations" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="visualizations"><span class="header-section-number">1.2</span> Visualizations</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(sp500_data_clean, <span class="fu">aes</span>(<span class="at">x =</span> Date, <span class="at">y =</span> <span class="st">`</span><span class="at">4. close</span><span class="st">`</span>)) <span class="sc">+</span></span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> <span class="st">"blue"</span>) <span class="sc">+</span></span>
@@ -1189,8 +1173,8 @@ Caused by warning:
 </div>
 </div>
 </div>
-<section id="alphavantage-fetch-u.s.-equities-data" class="level3">
-<h3 class="anchored" data-anchor-id="alphavantage-fetch-u.s.-equities-data">AlphaVantage: Fetch U.S. Equities Data</h3>
+<section id="alphavantage-fetch-u.s.-equities-data" class="level3" data-number="1.2.1">
+<h3 data-number="1.2.1" class="anchored" data-anchor-id="alphavantage-fetch-u.s.-equities-data"><span class="header-section-number">1.2.1</span> AlphaVantage: Fetch U.S. Equities Data</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Example for fetching S&amp;P 500 monthly adjusted close prices</span></span>
 <span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>alpha_url <span class="ot">&lt;-</span> <span class="st">"https://www.alphavantage.co/query"</span></span>
@@ -1225,8 +1209,8 @@ Caused by warning:
 </div>
 </div>
 </section>
-<section id="visualizing-the-sp-500-adjusted-close-prices" class="level3">
-<h3 class="anchored" data-anchor-id="visualizing-the-sp-500-adjusted-close-prices">Visualizing the S&amp;P 500 Adjusted Close Prices</h3>
+<section id="visualizing-the-sp-500-adjusted-close-prices" class="level3" data-number="1.2.2">
+<h3 data-number="1.2.2" class="anchored" data-anchor-id="visualizing-the-sp-500-adjusted-close-prices"><span class="header-section-number">1.2.2</span> Visualizing the S&amp;P 500 Adjusted Close Prices</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -1321,8 +1305,8 @@ Caused by warning:
 </div>
 </section>
 </section>
-<section id="monte-carlo-stimulation" class="level2">
-<h2 class="anchored" data-anchor-id="monte-carlo-stimulation">Monte Carlo Stimulation</h2>
+<section id="monte-carlo-stimulation" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="monte-carlo-stimulation"><span class="header-section-number">1.3</span> Monte Carlo Stimulation</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Monte Carlo Simulation of Monthly Returns</span></span>
 <span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)  <span class="co"># For reproducibility</span></span>
@@ -1360,8 +1344,8 @@ Caused by warning:
 </div>
 </div>
 </div>
-<section id="summary-statistics-for-the-simulations" class="level3">
-<h3 class="anchored" data-anchor-id="summary-statistics-for-the-simulations">Summary Statistics for the Simulations</h3>
+<section id="summary-statistics-for-the-simulations" class="level3" data-number="1.3.1">
+<h3 data-number="1.3.1" class="anchored" data-anchor-id="summary-statistics-for-the-simulations"><span class="header-section-number">1.3.1</span> Summary Statistics for the Simulations</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate summary statistics at the final month</span></span>
 <span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>final_month_stats <span class="ot">&lt;-</span> simulated_cum_df <span class="sc">%&gt;%</span></span>
@@ -1385,8 +1369,8 @@ Caused by warning:
 </div>
 </div>
 </section>
-<section id="overlay-key-metrics-on-the-plot" class="level3">
-<h3 class="anchored" data-anchor-id="overlay-key-metrics-on-the-plot">Overlay Key Metrics on the Plot</h3>
+<section id="overlay-key-metrics-on-the-plot" class="level3" data-number="1.3.2">
+<h3 data-number="1.3.2" class="anchored" data-anchor-id="overlay-key-metrics-on-the-plot"><span class="header-section-number">1.3.2</span> Overlay Key Metrics on the Plot</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
 <span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
@@ -1429,8 +1413,8 @@ Caused by warning:
 </div>
 </div>
 </section>
-<section id="step-1-combine-wage-growth-and-simulated-returns" class="level3">
-<h3 class="anchored" data-anchor-id="step-1-combine-wage-growth-and-simulated-returns">Step 1: Combine Wage Growth and Simulated Returns</h3>
+<section id="step-1-combine-wage-growth-and-simulated-returns" class="level3" data-number="1.3.3">
+<h3 data-number="1.3.3" class="anchored" data-anchor-id="step-1-combine-wage-growth-and-simulated-returns"><span class="header-section-number">1.3.3</span> Step 1: Combine Wage Growth and Simulated Returns</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensure columns are in Date format</span></span>
 <span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>wage_df_aligned <span class="ot">&lt;-</span> wage_df_monthly <span class="sc">%&gt;%</span></span>
@@ -1535,8 +1519,8 @@ Caused by warning:
 </div>
 </div>
 </section>
-<section id="calculate-contributions-and-portfolio-growth" class="level3">
-<h3 class="anchored" data-anchor-id="calculate-contributions-and-portfolio-growth">Calculate Contributions and Portfolio Growth</h3>
+<section id="calculate-contributions-and-portfolio-growth" class="level3" data-number="1.3.4">
+<h3 data-number="1.3.4" class="anchored" data-anchor-id="calculate-contributions-and-portfolio-growth"><span class="header-section-number">1.3.4</span> Calculate Contributions and Portfolio Growth</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Parameters for simulation</span></span>
 <span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>contribution_rate <span class="ot">&lt;-</span> <span class="fl">0.1</span>  <span class="co"># 10% of salary</span></span>
@@ -1572,8 +1556,8 @@ Caused by warning:
 </div>
 </div>
 </section>
-<section id="visualize-portfolio-value-distribution" class="level3">
-<h3 class="anchored" data-anchor-id="visualize-portfolio-value-distribution">Visualize Portfolio Value Distribution</h3>
+<section id="visualize-portfolio-value-distribution" class="level3" data-number="1.3.5">
+<h3 data-number="1.3.5" class="anchored" data-anchor-id="visualize-portfolio-value-distribution"><span class="header-section-number">1.3.5</span> Visualize Portfolio Value Distribution</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -1595,8 +1579,8 @@ Caused by warning:
 </div>
 </div>
 </section>
-<section id="calculate-probability-of-achieving-financial-goals" class="level3">
-<h3 class="anchored" data-anchor-id="calculate-probability-of-achieving-financial-goals">Calculate Probability of Achieving Financial Goals</h3>
+<section id="calculate-probability-of-achieving-financial-goals" class="level3" data-number="1.3.6">
+<h3 data-number="1.3.6" class="anchored" data-anchor-id="calculate-probability-of-achieving-financial-goals"><span class="header-section-number">1.3.6</span> Calculate Probability of Achieving Financial Goals</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Probability of achieving a $1M goal</span></span>
 <span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>goal <span class="ot">&lt;-</span> <span class="dv">1000000</span>  <span class="co"># $1M goal</span></span>
@@ -1610,8 +1594,8 @@ Caused by warning:
 </div>
 </div>
 </section>
-<section id="further-enhancements" class="level3">
-<h3 class="anchored" data-anchor-id="further-enhancements">Further Enhancements</h3>
+<section id="further-enhancements" class="level3" data-number="1.3.7">
+<h3 data-number="1.3.7" class="anchored" data-anchor-id="further-enhancements"><span class="header-section-number">1.3.7</span> Further Enhancements</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a>combined_data <span class="ot">&lt;-</span> combined_data <span class="sc">%&gt;%</span></span>
 <span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
@@ -1631,8 +1615,8 @@ Caused by warning:
 <span id="cb81-9"><a href="#cb81-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">retirement_portfolio =</span> final_portfolio_value <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> withdrawal_rate))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="visualize-post-retirement-portfolio" class="level3">
-<h3 class="anchored" data-anchor-id="visualize-post-retirement-portfolio">Visualize Post-Retirement Portfolio</h3>
+<section id="visualize-post-retirement-portfolio" class="level3" data-number="1.3.8">
+<h3 data-number="1.3.8" class="anchored" data-anchor-id="visualize-post-retirement-portfolio"><span class="header-section-number">1.3.8</span> Visualize Post-Retirement Portfolio</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the distribution of retirement portfolio values</span></span>
 <span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(portfolio_summary, <span class="fu">aes</span>(<span class="at">x =</span> retirement_portfolio)) <span class="sc">+</span></span>
@@ -1652,8 +1636,8 @@ Caused by warning:
 </div>
 </div>
 </section>
-<section id="bootstrap-sampling" class="level3">
-<h3 class="anchored" data-anchor-id="bootstrap-sampling">Bootstrap Sampling</h3>
+<section id="bootstrap-sampling" class="level3" data-number="1.3.9">
+<h3 data-number="1.3.9" class="anchored" data-anchor-id="bootstrap-sampling"><span class="header-section-number">1.3.9</span> Bootstrap Sampling</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Number of bootstrap simulations</span></span>
 <span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a>n_bootstrap <span class="ot">&lt;-</span> <span class="dv">200</span></span>
@@ -1673,8 +1657,8 @@ Caused by warning:
 <span id="cb83-16"><a href="#cb83-16" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="calculation" class="level3">
-<h3 class="anchored" data-anchor-id="calculation">Calculation</h3>
+<section id="calculation" class="level3" data-number="1.3.10">
+<h3 data-number="1.3.10" class="anchored" data-anchor-id="calculation"><span class="header-section-number">1.3.10</span> Calculation</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define withdrawal rate</span></span>
 <span id="cb84-2"><a href="#cb84-2" aria-hidden="true" tabindex="-1"></a>withdrawal_rate <span class="ot">&lt;-</span> <span class="fl">0.04</span></span>
@@ -1706,8 +1690,8 @@ Caused by warning:
 <span id="cb84-28"><a href="#cb84-28" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="analysis" class="level3">
-<h3 class="anchored" data-anchor-id="analysis">Analysis</h3>
+<section id="analysis" class="level3" data-number="1.3.11">
+<h3 data-number="1.3.11" class="anchored" data-anchor-id="analysis"><span class="header-section-number">1.3.11</span> Analysis</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Analyze bootstrap results</span></span>
 <span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a>bootstrap_analysis <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(bootstrap_results, <span class="cf">function</span>(res) {</span>
@@ -1735,8 +1719,8 @@ Caused by warning:
 </div>
 </div>
 </section>
-<section id="visualize-results" class="level3">
-<h3 class="anchored" data-anchor-id="visualize-results">Visualize Results</h3>
+<section id="visualize-results" class="level3" data-number="1.3.12">
+<h3 data-number="1.3.12" class="anchored" data-anchor-id="visualize-results"><span class="header-section-number">1.3.12</span> Visualize Results</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bootstrap_analysis, <span class="fu">aes</span>(<span class="at">x =</span> exhausted)) <span class="sc">+</span></span>
 <span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">fill =</span> <span class="st">"red"</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
@@ -1777,19 +1761,19 @@ Caused by warning:
 </ul></li>
 </ol>
 </section>
-<section id="recommendations" class="level3">
-<h3 class="anchored" data-anchor-id="recommendations"><strong>Recommendations</strong></h3>
+<section id="recommendations" class="level3" data-number="1.3.13">
+<h3 data-number="1.3.13" class="anchored" data-anchor-id="recommendations"><span class="header-section-number">1.3.13</span> <strong>Recommendations</strong></h3>
 <p>Based on the simulations, here are the recommendations:</p>
-<section id="if-the-employee-prefers-stability" class="level4">
-<h4 class="anchored" data-anchor-id="if-the-employee-prefers-stability"><strong>If the Employee Prefers Stability</strong>:</h4>
+<section id="if-the-employee-prefers-stability" class="level4" data-number="1.3.13.1">
+<h4 data-number="1.3.13.1" class="anchored" data-anchor-id="if-the-employee-prefers-stability"><span class="header-section-number">1.3.13.1</span> <strong>If the Employee Prefers Stability</strong>:</h4>
 <p>The TRS plan is more suitable for employees who prioritize income stability during retirement. It provides:</p>
 <ul>
 <li><p>Predictable monthly payments.</p></li>
 <li><p>Protection against market volatility.</p></li>
 </ul>
 </section>
-<section id="if-the-employee-prefers-flexibility-and-growth-potential" class="level4">
-<h4 class="anchored" data-anchor-id="if-the-employee-prefers-flexibility-and-growth-potential"><strong>If the Employee Prefers Flexibility and Growth Potential</strong>:</h4>
+<section id="if-the-employee-prefers-flexibility-and-growth-potential" class="level4" data-number="1.3.13.2">
+<h4 data-number="1.3.13.2" class="anchored" data-anchor-id="if-the-employee-prefers-flexibility-and-growth-potential"><span class="header-section-number">1.3.13.2</span> <strong>If the Employee Prefers Flexibility and Growth Potential</strong>:</h4>
 <p>The ORP plan offers greater flexibility and potentially higher returns. However, the employee must:</p>
 <ul>
 <li><p>Be comfortable with market risk.</p></li>
@@ -1798,8 +1782,8 @@ Caused by warning:
 <hr>
 </section>
 </section>
-<section id="considerations-for-the-employee" class="level3">
-<h3 class="anchored" data-anchor-id="considerations-for-the-employee"><strong>Considerations for the Employee</strong></h3>
+<section id="considerations-for-the-employee" class="level3" data-number="1.3.14">
+<h3 data-number="1.3.14" class="anchored" data-anchor-id="considerations-for-the-employee"><span class="header-section-number">1.3.14</span> <strong>Considerations for the Employee</strong></h3>
 <ol type="1">
 <li><p><strong>Age and Career Duration</strong>:</p>
 <ul>
@@ -1824,8 +1808,8 @@ Caused by warning:
 </ol>
 <hr>
 </section>
-<section id="limitations-and-uncertainty" class="level3">
-<h3 class="anchored" data-anchor-id="limitations-and-uncertainty"><strong>Limitations and Uncertainty</strong></h3>
+<section id="limitations-and-uncertainty" class="level3" data-number="1.3.15">
+<h3 data-number="1.3.15" class="anchored" data-anchor-id="limitations-and-uncertainty"><span class="header-section-number">1.3.15</span> <strong>Limitations and Uncertainty</strong></h3>
 <ol type="1">
 <li><p><strong>Bootstrap Sampling</strong>:</p>
 <ul>
@@ -1844,8 +1828,8 @@ Caused by warning:
 </ol>
 <hr>
 </section>
-<section id="conclusion" class="level3">
-<h3 class="anchored" data-anchor-id="conclusion"><strong>Conclusion</strong></h3>
+<section id="conclusion" class="level3" data-number="1.3.16">
+<h3 data-number="1.3.16" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">1.3.16</span> <strong>Conclusion</strong></h3>
 <p>The choice between TRS and ORP depends on the employee’s individual priorities and circumstances. For those seeking stability and simplicity, TRS is a safer option. For those aiming to maximize retirement wealth and are comfortable with risk, ORP can offer higher potential returns, provided they follow a disciplined withdrawal strategy.</p>
 <p><strong>Final Recommendation</strong>: Align the decision with personal goals, risk tolerance, and financial needs. Regularly review and adjust the chosen plan as circumstances evolve.</p>
 

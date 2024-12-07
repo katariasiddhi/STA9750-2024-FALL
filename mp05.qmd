@@ -1,14 +1,22 @@
 ---
-title: "Monte Carlo-Informed Selection of CUNY Retirement Plans"
-author: "Siddhi Kataria"
-date: "2024-12-04"
-output:
+project:
+  type: website
+  title: "Monte Carlo-Informed Selection of CUNY Retirement Plans"
+  author: "Siddhi Kataria"
+  date: "2024-12-04"
+
+format:
   html:
-    toc: true
-    toc_depth: 2
-    theme: lux  # Change to cosmo or flatly if preferred
-    css: styles.css  # Optional: Add your custom CSS
+    theme: lux          # Use your preferred theme
+    css: styles.css     # Optional: Add your custom CSS for styles
+    toc: true           # Include a table of contents
+    toc-depth: 2        # Depth for table of contents
     number-sections: true
+
+publish:
+  gh_pages:
+    branch: gh-pages    # Publish to the `gh-pages` branch
+    path: /             # Root directory of the GitHub Pages site
 ---
 
 # Introduction
