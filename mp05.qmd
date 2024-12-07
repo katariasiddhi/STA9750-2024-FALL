@@ -1,22 +1,21 @@
 ---
-project:
-  type: website
-  title: "Monte Carlo-Informed Selection of CUNY Retirement Plans"
-  author: "Siddhi Kataria"
-  date: "2024-12-04"
+title: "Monte Carlo-Informed Selection of CUNY Retirement Plans"
+author: "Siddhi Kataria"
+date: "2024-12-04"
 
 format:
   html:
-    theme: flatly       
-    css: styles.css     
-    toc: true           
-    toc-depth: 2        
-    number-sections: true
+    theme: flatly       # Theme for styling
+    css: styles.css     # Optional custom CSS file
+    toc: true           # Include a table of contents
+    toc-depth: 2        # Depth of the table of contents
+    number-sections: true # Number sections in the document
 
-publish:
-  gh_pages:
-    branch: gh-pages   
-    path: /             
+execute:
+  echo: true            # Show code in the output
+  warning: false        # Suppress warnings in the output
+
+output-file: mp05.html  # Specify output HTML filename
 ---
 
 # Introduction
