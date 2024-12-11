@@ -1,7 +1,18 @@
 ---
-title: "Individual-Report"
-author: "Siddhi Kataria"
-editor: visual
+title: "Individual Report"
+author: Siddhi Kataria
+date: "2024-12-04"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    theme: cosmo
+    code-fold: true
+    number-sections: true
+    code-tools: true
+    code-overflow: wrap
+    fig-width: 6
+    fig-height: 4
 ---
 
 ## **Introduction**
