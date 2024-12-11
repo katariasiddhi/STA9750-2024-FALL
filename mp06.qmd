@@ -188,9 +188,6 @@ ggplot(sp500_data_clean, aes(x = Date, y = `4. close`)) +
 
 ```
 
-```         
-```
-
 ```{r}
 str(fred_data)
 
