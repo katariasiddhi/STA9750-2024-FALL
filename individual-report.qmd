@@ -13,6 +13,8 @@ format:
     code-overflow: wrap
     fig-width: 6
     fig-height: 4
+    self-contained: true
+    smooth-scroll: true
 ---
 
 ## **Introduction**
